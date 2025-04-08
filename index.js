@@ -5,7 +5,7 @@ function getTotalClasses() {
     const end = new Date(document.getElementById("endDate").value);
     const perWeek = parseInt(document.getElementById("classesPerWeek").value);
 
-      if (isNaN(start) || isNaN(end) || isNaN(perWeek)) return 0;
+    if (isNaN(start) || isNaN(end) || isNaN(perWeek)) return 0;
 
   const weeks = Math.ceil((end - start) / (1000 * 60 * 60 * 24 * 7));
   return weeks * perWeek;
