@@ -1,9 +1,9 @@
 body {
     background-color: #121212;
     color: #ffffff;
-    font-family: 'Segoe UI', sans-serif;
+    font-family: "Segoe UI", sans-serif;
     padding: 20px;
-} 
+}
 
 label {
     display: block;
@@ -35,7 +35,8 @@ button:hover {
     background-color: #3a3a3a;
 }
 
-h1, h2 {
+h1,
+h2 {
     color: #ffffff;
 }
 
