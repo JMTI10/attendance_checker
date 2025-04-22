@@ -1,65 +1,59 @@
 // App.jsx
 import { useState } from "react";
 import "./index.css";
+import ClassTracker from "./ClassTracker";
 
 export default function App() {
-    const [startDate, setStartDate] = useState("");
-    const [endDate, setEndDate] = useState("");
-    const [classesPerWeek, setClassesPerWeek] = useState(1);
-    const [status, setStatus] = useState("No data yet");
+    const [classes, setClasses] = useState([]);
+    const [newClassName, setNewClassName] = useState("");
 
-    const markAttendance = (type) => {
-        setStatus(`Marked: ${type.toUpperCase()} ✔️`);
-        // TODO: add full logic here later
+    const addClass = () => {
+        if (newClassName.trim()) {
+            setClasses((prev) => [
+                ...prev,
+                { name: newClassName.trim(), expanded: false },
+            ]);
+            setNewClassName("");
+        }
+    };
+
+    const toggleClass = (index) => {
+        setClasses((prev) =>
+            prev.map((cls, i) =>
+                i === index ? { ...cls, expanded: !cls.expanded } : cls
+            )
+        );
     };
 
     return (
         <div>
             <h1>Class Attendance Tracker</h1>
 
-            <label>
-                Start Date:
-                <input
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                />
-            </label>
-
-            <label>
-                End Date:
-                <input
-                    type="date"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                />
-            </label>
-
-            <label>
-                Classes per Week:
-                <input
-                    type="number"
-                    min="1"
-                    max="7"
-                    value={classesPerWeek}
-                    onChange={(e) => setClassesPerWeek(e.target.value)}
-                />
-            </label>
-
             <div>
-                <button onClick={() => markAttendance("attended")}>
-                    ✅ Attended
-                </button>
-                <button onClick={() => markAttendance("missed")}>
-                    ❌ Missed
-                </button>
-                <button onClick={() => markAttendance("canceled")}>
-                    🚫 Canceled
-                </button>
+                <input
+                    type="text"
+                    value={newClassName}
+                    placeholder="Enter class name"
+                    onChange={(e) => setNewClassName(e.target.value)}
+                />
+                <button onClick={addClass}>➕ Add Class</button>
             </div>
 
-            <h2>Status</h2>
-            <p id="stats">{status}</p>
+            {classes.map((cls, index) => (
+                <div key={index} style={{ marginTop: "1rem" }}>
+                    <button onClick={() => toggleClass(index)}>
+                        {cls.expanded ? "▼" : "▶"} {cls.name}
+                    </button>
+                    {cls.expanded && (
+                        <div
+                            style={{ paddingLeft: "1rem", marginTop: "0.5rem" }}
+                        >
+                            {/* THIS is where we show what's inside the dropdown */}
+                            <p>📅 Attendance goes here (per class)</p>
+                        </div>
+                    )}
+                </div>
+            ))}
         </div>
     );
 }
