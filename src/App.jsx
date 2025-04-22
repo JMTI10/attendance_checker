@@ -1,12 +1,18 @@
 // App.jsx
 import { useState } from "react";
-import "./index.css";
 import ClassTracker from "./ClassTracker";
+import "./index.css";
 
 export default function App() {
+    // State to hold class list
     const [classes, setClasses] = useState([]);
     const [newClassName, setNewClassName] = useState("");
 
+    // State for deletion mode
+    const [deleteMode, setDeleteMode] = useState(false);
+    const [selectedToDelete, setSelectedToDelete] = useState([]);
+
+    // Add new class with default expanded state false
     const addClass = () => {
         if (newClassName.trim()) {
             setClasses((prev) => [
@@ -17,6 +23,7 @@ export default function App() {
         }
     };
 
+    // Toggle dropdown expansion per class
     const toggleClass = (index) => {
         setClasses((prev) =>
             prev.map((cls, i) =>
@@ -25,11 +32,21 @@ export default function App() {
         );
     };
 
+    // Delete all selected classes
+    const deleteSelected = () => {
+        setClasses((prev) =>
+            prev.filter((_, i) => !selectedToDelete.includes(i))
+        );
+        setSelectedToDelete([]);
+        setDeleteMode(false);
+    };
+
     return (
         <div>
             <h1>Class Attendance Tracker</h1>
 
-            <div>
+            {/* Controls for adding and deleting classes */}
+            <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
                 <input
                     type="text"
                     value={newClassName}
@@ -37,23 +54,69 @@ export default function App() {
                     onChange={(e) => setNewClassName(e.target.value)}
                 />
                 <button onClick={addClass}>➕ Add Class</button>
+                <button onClick={() => setDeleteMode((prev) => !prev)}>
+                    🗑️ {deleteMode ? "Cancel" : "Delete Classes"}
+                </button>
+                {deleteMode && selectedToDelete.length > 0 && (
+                    <button onClick={deleteSelected}>❌ Delete Selected</button>
+                )}
             </div>
 
-            {classes.map((cls, index) => (
-                <div key={index} style={{ marginTop: "1rem" }}>
-                    <button onClick={() => toggleClass(index)}>
-                        {cls.expanded ? "▼" : "▶"} {cls.name}
-                    </button>
-                    {cls.expanded && (
+            {/* Class cards shown as flex wrap layout */}
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
+                {classes.map((cls, index) => (
+                    <div
+                        key={index}
+                        style={{
+                            border: "1px solid #444",
+                            borderRadius: "8px",
+                            padding: "1rem",
+                            backgroundColor: "#1e1e1e",
+                            minWidth: "250px",
+                            flex: "1 1 250px",
+                        }}
+                    >
+                        {/* Class title and delete-mode checkbox */}
                         <div
-                            style={{ paddingLeft: "1rem", marginTop: "0.5rem" }}
+                            style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "0.5rem",
+                            }}
                         >
-                            {/* THIS is where we show what's inside the dropdown */}
-                            <p>📅 Attendance goes here (per class)</p>
+                            <button onClick={() => toggleClass(index)}>
+                                {cls.expanded ? "▼" : "▶"} {cls.name}
+                            </button>
+
+                            {deleteMode && (
+                                <input
+                                    type="checkbox"
+                                    checked={selectedToDelete.includes(index)}
+                                    onChange={(e) => {
+                                        if (e.target.checked) {
+                                            setSelectedToDelete((prev) => [
+                                                ...prev,
+                                                index,
+                                            ]);
+                                        } else {
+                                            setSelectedToDelete((prev) =>
+                                                prev.filter((i) => i !== index)
+                                            );
+                                        }
+                                    }}
+                                />
+                            )}
                         </div>
-                    )}
-                </div>
-            ))}
+
+                        {/* Expanded attendance tracker inside dropdown */}
+                        {cls.expanded && (
+                            <div style={{ marginTop: "0.5rem" }}>
+                                <ClassTracker />
+                            </div>
+                        )}
+                    </div>
+                ))}
+            </div>
         </div>
     );
 }
