@@ -1,23 +1,34 @@
-// ClassTracker.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import "./css/ClassTracker.css";
 
-export default function ClassTracker() {
-    const [startDate, setStartDate] = useState("");
-    const [endDate, setEndDate] = useState("");
-    const [classesPerWeek, setClassesPerWeek] = useState(1);
-    const [dates, setDates] = useState([]);
-    const [attendance, setAttendance] = useState({});
+export default function ClassTracker({ trackerData, onUpdate }) {
+    const [startDate, setStartDate] = useState(trackerData.startDate || "");
+    const [endDate, setEndDate] = useState(trackerData.endDate || "");
+    const [classesPerWeek, setClassesPerWeek] = useState(
+        trackerData.classesPerWeek || 1
+    );
+    const [dates, setDates] = useState(trackerData.dates || []);
+    const [attendance, setAttendance] = useState(trackerData.attendance || {});
+
+    useEffect(() => {
+        onUpdate({
+            startDate,
+            endDate,
+            classesPerWeek,
+            dates,
+            attendance,
+        });
+    }, [startDate, endDate, classesPerWeek, dates, attendance]);
 
     const generateDates = () => {
         if (!startDate || !endDate || classesPerWeek < 1) return;
 
         const start = new Date(startDate);
         const end = new Date(endDate);
-        const totalDays = (end - start) / (1000 * 60 * 60 * 24);
         const step = Math.floor(7 / classesPerWeek);
 
         const generated = [];
-        let current = new Date(start);
+        const current = new Date(start);
 
         while (current <= end) {
             generated.push(current.toISOString().split("T")[0]);
@@ -25,10 +36,19 @@ export default function ClassTracker() {
         }
 
         setDates(generated);
+        setAttendance({});
     };
 
     const mark = (date, type) => {
         setAttendance((prev) => ({ ...prev, [date]: type }));
+    };
+
+    const clearMark = (date) => {
+        setAttendance((prev) => {
+            const updated = { ...prev };
+            delete updated[date];
+            return updated;
+        });
     };
 
     const getStats = () => {
@@ -46,7 +66,7 @@ export default function ClassTracker() {
     };
 
     return (
-        <div style={{ marginTop: "1rem" }}>
+        <div>
             <label>
                 Start Date:
                 <input
@@ -94,10 +114,16 @@ export default function ClassTracker() {
                                 <button onClick={() => mark(date, "canceled")}>
                                     🚫
                                 </button>
+
+                                {attendance[date] && (
+                                    <button onClick={() => clearMark(date)}>
+                                        📝
+                                    </button>
+                                )}
                             </li>
                         ))}
                     </ul>
-                    <pre style={{ marginTop: "10px" }}>{getStats()}</pre>
+                    <pre className="tracker-stats">{getStats()}</pre>
                 </div>
             )}
         </div>

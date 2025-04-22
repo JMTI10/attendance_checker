@@ -1,29 +1,47 @@
 // App.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ClassTracker from "./ClassTracker";
-import "./index.css";
+import "./css/index.css";
+import "./css/App.css";
 
 export default function App() {
-    // State to hold class list
     const [classes, setClasses] = useState([]);
     const [newClassName, setNewClassName] = useState("");
-
-    // State for deletion mode
     const [deleteMode, setDeleteMode] = useState(false);
     const [selectedToDelete, setSelectedToDelete] = useState([]);
 
-    // Add new class with default expanded state false
+    // Load classes from localStorage on first render
+    useEffect(() => {
+        const saved = localStorage.getItem("attendance-classes");
+        if (saved) {
+            setClasses(JSON.parse(saved));
+        }
+    }, []);
+
+    // Save classes to localStorage whenever they change
+    useEffect(() => {
+        localStorage.setItem("attendance-classes", JSON.stringify(classes));
+    }, [classes]);
+
     const addClass = () => {
         if (newClassName.trim()) {
-            setClasses((prev) => [
-                ...prev,
-                { name: newClassName.trim(), expanded: false },
-            ]);
+            const newClass = {
+                name: newClassName.trim(),
+                expanded: false,
+                editing: false,
+                trackerData: {
+                    startDate: "",
+                    endDate: "",
+                    classesPerWeek: 1,
+                    dates: [],
+                    attendance: {},
+                },
+            };
+            setClasses((prev) => [...prev, newClass]);
             setNewClassName("");
         }
     };
 
-    // Toggle dropdown expansion per class
     const toggleClass = (index) => {
         setClasses((prev) =>
             prev.map((cls, i) =>
@@ -32,7 +50,6 @@ export default function App() {
         );
     };
 
-    // Delete all selected classes
     const deleteSelected = () => {
         setClasses((prev) =>
             prev.filter((_, i) => !selectedToDelete.includes(i))
@@ -41,12 +58,53 @@ export default function App() {
         setDeleteMode(false);
     };
 
+    // Update tracker data for a specific class
+    const updateTrackerData = (index, updatedTrackerData) => {
+        setClasses((prev) =>
+            prev.map((cls, i) =>
+                i === index ? { ...cls, trackerData: updatedTrackerData } : cls
+            )
+        );
+    };
+
+    const startEdit = (index) => {
+        setClasses((prev) =>
+            prev.map((cls, i) =>
+                i === index ? { ...cls, editing: true } : cls
+            )
+        );
+    };
+
+    const cancelEdit = (index) => {
+        setClasses((prev) =>
+            prev.map((cls, i) =>
+                i === index ? { ...cls, editing: false } : cls
+            )
+        );
+    };
+
+    const saveEdit = (index) => {
+        setClasses((prev) =>
+            prev.map((cls, i) =>
+                i === index ? { ...cls, editing: false } : cls
+            )
+        );
+    };
+
+    const updateClassName = (index, newName) => {
+        setClasses((prev) =>
+            prev.map((cls, i) =>
+                i === index ? { ...cls, name: newName } : cls
+            )
+        );
+    };
+
     return (
         <div>
             <h1>Class Attendance Tracker</h1>
 
-            {/* Controls for adding and deleting classes */}
-            <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
+            {/* Controls */}
+            <div className="class-list">
                 <input
                     type="text"
                     value={newClassName}
@@ -62,31 +120,40 @@ export default function App() {
                 )}
             </div>
 
-            {/* Class cards shown as flex wrap layout */}
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
+            {/* Class list */}
+            <div className="class-list">
                 {classes.map((cls, index) => (
-                    <div
-                        key={index}
-                        style={{
-                            border: "1px solid #444",
-                            borderRadius: "8px",
-                            padding: "1rem",
-                            backgroundColor: "#1e1e1e",
-                            minWidth: "250px",
-                            flex: "1 1 250px",
-                        }}
-                    >
-                        {/* Class title and delete-mode checkbox */}
-                        <div
-                            style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "0.5rem",
-                            }}
-                        >
-                            <button onClick={() => toggleClass(index)}>
-                                {cls.expanded ? "▼" : "▶"} {cls.name}
-                            </button>
+                    <div key={index} className="class-card">
+                        <div className="class-controls">
+                            {cls.editing ? (
+                                <>
+                                    <input
+                                        type="text"
+                                        value={cls.name}
+                                        onChange={(e) =>
+                                            updateClassName(
+                                                index,
+                                                e.target.value
+                                            )
+                                        }
+                                    />
+                                    <button onClick={() => saveEdit(index)}>
+                                        ✅
+                                    </button>
+                                    <button onClick={() => cancelEdit(index)}>
+                                        ❌
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <button onClick={() => toggleClass(index)}>
+                                        {cls.expanded ? "▼" : "▶"} {cls.name}
+                                    </button>
+                                    <button onClick={() => startEdit(index)}>
+                                        ✏️
+                                    </button>
+                                </>
+                            )}
 
                             {deleteMode && (
                                 <input
@@ -108,10 +175,14 @@ export default function App() {
                             )}
                         </div>
 
-                        {/* Expanded attendance tracker inside dropdown */}
                         {cls.expanded && (
-                            <div style={{ marginTop: "0.5rem" }}>
-                                <ClassTracker />
+                            <div className="tracker-wrapper">
+                                <ClassTracker
+                                    trackerData={cls.trackerData}
+                                    onUpdate={(newData) =>
+                                        updateTrackerData(index, newData)
+                                    }
+                                />
                             </div>
                         )}
                     </div>

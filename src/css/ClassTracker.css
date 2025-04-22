@@ -1,0 +1,36 @@
+.tracker-container {
+    margin-top: 1rem;
+}
+
+.tracker-label {
+    display: block;
+    margin: 10px 0;
+    color: #ccc;
+}
+
+.tracker-button {
+    margin: 5px;
+    padding: 5px 12px;
+    font-size: 16px;
+    background-color: #2a2a2a;
+    color: #ffffff;
+    border: 1px solid #444;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.tracker-button:hover {
+    background-color: #3a3a3a;
+}
+
+.tracker-list {
+    margin-top: 1rem;
+}
+
+.tracker-edit-button {
+    margin-left: 10px;
+}
+
+.tracker-stats {
+    margin-top: 10px;
+}
