@@ -10,11 +10,13 @@ export default function App() {
 
     const markAttendance = (type) => {
         setStatus(`Marked: ${type.toUpperCase()} ✔️`);
+        // TODO: add full logic here later
     };
 
     return (
         <div>
             <h1>Class Attendance Tracker</h1>
+
             <label>
                 Start Date:
                 <input
