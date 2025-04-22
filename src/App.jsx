@@ -1,4 +1,3 @@
-// App.jsx
 import { useState, useEffect } from "react";
 import ClassTracker from "./ClassTracker";
 import "./css/index.css";
@@ -10,15 +9,13 @@ export default function App() {
     const [deleteMode, setDeleteMode] = useState(false);
     const [selectedToDelete, setSelectedToDelete] = useState([]);
 
-    // Load classes from localStorage on first render
     useEffect(() => {
-        const saved = localStorage.getItem("attendance-classes");
-        if (saved) {
-            setClasses(JSON.parse(saved));
+        const savedClasses = localStorage.getItem("attendance-classes");
+        if (savedClasses) {
+            setClasses(JSON.parse(savedClasses));
         }
     }, []);
 
-    // Save classes to localStorage whenever they change
     useEffect(() => {
         localStorage.setItem("attendance-classes", JSON.stringify(classes));
     }, [classes]);
@@ -58,7 +55,6 @@ export default function App() {
         setDeleteMode(false);
     };
 
-    // Update tracker data for a specific class
     const updateTrackerData = (index, updatedTrackerData) => {
         setClasses((prev) =>
             prev.map((cls, i) =>
@@ -99,12 +95,57 @@ export default function App() {
         );
     };
 
+    const manualSave = () => {
+        try {
+            const data = JSON.stringify(classes);
+            localStorage.setItem("attendance-classes", data);
+            console.log("Saved to localStorage:", data);
+            alert("Saved manually! ✅");
+        } catch (err) {
+            console.error("Failed to save to localStorage", err);
+        }
+    };
+
+    const exportToFile = () => {
+        const blob = new Blob([JSON.stringify(classes, null, 2)], {
+            type: "application/json",
+        });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "attendance_backup.json";
+        link.click();
+        URL.revokeObjectURL(url);
+    };
+
+    const importFromFile = (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const importedData = JSON.parse(e.target.result);
+                if (Array.isArray(importedData)) {
+                    setClasses(importedData);
+                    alert("Backup imported successfully ✅");
+                } else {
+                    alert("Invalid file format ❌");
+                }
+            } catch (err) {
+                alert("Failed to read file ❌");
+                console.error(err);
+            }
+        };
+        reader.readAsText(file);
+    };
+
     return (
         <div>
             <h1>Class Attendance Tracker</h1>
 
             {/* Controls */}
-            <div className="class-list">
+            <div className="button-panel">
                 <input
                     type="text"
                     value={newClassName}
@@ -118,6 +159,18 @@ export default function App() {
                 {deleteMode && selectedToDelete.length > 0 && (
                     <button onClick={deleteSelected}>❌ Delete Selected</button>
                 )}
+                <button onClick={manualSave}>💾 Save</button>
+                <button onClick={exportToFile}>📤 Export Backup</button>
+
+                <label className="import-label">
+                    📥 Import Backup
+                    <input
+                        type="file"
+                        accept="application/json"
+                        onChange={importFromFile}
+                        style={{ display: "none" }}
+                    />
+                </label>
             </div>
 
             {/* Class list */}

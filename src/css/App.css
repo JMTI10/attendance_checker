@@ -22,3 +22,60 @@
 .tracker-wrapper {
     margin-top: 0.5rem;
 }
+
+.import-label {
+    cursor: pointer;
+    padding: 10px 20px;
+    background-color: #2a2a2a;
+    border: 1px solid #444;
+    border-radius: 6px;
+    color: white;
+    display: inline-block;
+    margin-left: 10px;
+}
+.import-label:hover {
+    background-color: #3a3a3a;
+}
+
+.button-panel {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+    align-items: center;
+}
+
+.button-panel input[type="text"] {
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 6px;
+    border: 1px solid #444;
+    background-color: #1e1e1e;
+    color: #fff;
+}
+
+.button-panel button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #2a2a2a;
+    color: #ffffff;
+    border: 1px solid #444;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.button-panel button:hover,
+.import-label:hover {
+    background-color: #3a3a3a;
+}
+
+.import-label {
+    cursor: pointer;
+    padding: 10px 20px;
+    background-color: #2a2a2a;
+    border: 1px solid #444;
+    border-radius: 6px;
+    color: white;
+    display: inline-block;
+}
